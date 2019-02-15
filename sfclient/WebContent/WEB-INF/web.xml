@@ -11,11 +11,23 @@
   </welcome-file-list>
   
   <servlet>
-		<servlet-name>SF Get Token</servlet-name>
-		<servlet-class>com.olympus.fis.sfclient.GetTokenSF</servlet-class>
-	</servlet>
+	<servlet-name>SF Get Token</servlet-name>
+	<servlet-class>com.olympus.fis.sfclient.GetSfToken</servlet-class>
+  </servlet>
 	<servlet-mapping>
 		<servlet-name>SF Get Token</servlet-name>
 		<url-pattern>/gettoken</url-pattern>
 	</servlet-mapping>
+	
+	  <servlet>
+	<servlet-name>Get Token</servlet-name>
+	<servlet-class>com.olympus.fis.sfclient.SfClient</servlet-class>
+  </servlet>
+	<servlet-mapping>
+		<servlet-name>Get Token</servlet-name>
+		<url-pattern>/runuri</url-pattern>
+	</servlet-mapping>
+	
+	
+	
 </web-app>

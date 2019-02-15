@@ -41,12 +41,12 @@ public class RestSfClient extends HttpServlet {
     	String appKey = "";
     	String jsonStr = "[{\"Status\" : \"Failed\" }] ";
     	String acct = "Test Rest";
-    	 //String acct = "Test";
+    	//String acct = "Test";
 		//String uri = "http://cvyhj3a27:8181/webreport/getchart?cType=SBS";
     	try {
 		    uri = "https://olympus--fis.cs40.my.salesforce.com/services/data/v42.0/query/?q=SELECT+id,Name+from+Account+where+Name+=+'" + URLEncoder.encode(acct, "UTF-8") + "'";  
     	} catch (UnsupportedEncodingException e) {
-    		 
+    		 e.printStackTrace();
     	}
 
 		//String uri = "https://olympus--fis.cs40.my.salesforce.com/services/data/v42.0/query/?q=SELECT+id,Name+from+Account";
