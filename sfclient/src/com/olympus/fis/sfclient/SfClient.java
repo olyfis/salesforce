@@ -7,8 +7,10 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
-
+import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +27,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
+//import org.apache.jasper.tagplugins.jstl.core.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -33,9 +37,6 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-
- 
-
 
 public class SfClient  extends HttpServlet { 
 	static String USERNAME = null;
@@ -50,13 +51,37 @@ public class SfClient  extends HttpServlet {
 	static Header oauthHeader = null;
 	static Header prettyPrintHeader = new BasicHeader("X-PrettyPrint", "1");
 	
- 
- 
 	public SfClient() {
 		super();
-		// TODO Auto-generated constructor stub
-
 	}
+	/******************************************************************************************************************************************************************/	
+
+	/******************************************************************************************************************************************************************/	
+
+	/******************************************************************************************************************************************************************/	
+
+	/******************************************************************************************************************************************************************/	
+
+	public static void displayJsonArray(JSONArray jsonArr) {
+
+		Iterator<Object> iterator = jsonArr.iterator();
+		// Set<String> keys = jsonObject.keySet();
+		while (iterator.hasNext()) {
+
+			Object obj = iterator.next();
+			if (obj instanceof JSONObject) {
+				Set<String> keys = ((JSONObject) obj).keySet();
+				// System.out.println("%%%%%%%%% KEYS %%%%%%%%" + keys.toString() + "keyNum=" +
+				// keys.size());
+				for (String key : keys) {
+					// System.out.println(key + ":" + jsonObject.get(key));
+					System.out.println("*******Key: " + key + " -> " + ((JSONObject) obj).get(key));
+				}
+				// System.out.println("*******" + ((JSONObject) obj).get("CUST_ID"));
+			}
+		}
+	}
+	
 	/******************************************************************************************************************************************************************/	
 	public static void getProperties(String propFile) {
 		FileInputStream fis = null;
@@ -117,11 +142,7 @@ public class SfClient  extends HttpServlet {
 		} catch (IOException ioException) {
 			// Handle system IO exception
 		}
-		
-	 
 		JSONObject jsonObject = null;
-		
-
 		try {
 			jsonObject = (JSONObject) new JSONTokener(getResult).nextValue();
 			loginAccessToken = jsonObject.getString("access_token");
@@ -154,26 +175,24 @@ public class SfClient  extends HttpServlet {
 	}
 	
 	/******************************************************************************************************************************************************************/	
-
-    public static String runURI(String token) {
-    	String uri = "";
-     
-    	 
+    public static String runURI(String token, String uri) {
+    	//String uri = "";	 
     	String jsonStr = "[{\"Status\" : \"Failed\" }] ";
-    	String acct = "Test Rest";
+    	//String acct = "Test Rest";
     	//String appKey = "00D540000000fMN!ARgAQLuB5pEMHt8KDJYMV3jJgiSdKt92eOgSC3xMwrwMlH9mOCnjv8mopMu.hcdRnfbLsOx1yBI__IMcCUKM3De7Vkei_OQZ";
     	String appKey = "";
     	appKey = token;
+    	/*
     	try {
 		    uri = "https://olympus--fis.cs40.my.salesforce.com/services/data/v42.0/query/?q=SELECT+id,Name+from+Account+where+Name+=+'" 
 		    		+ URLEncoder.encode(acct, "UTF-8") + "'";  
     	} catch (UnsupportedEncodingException e) {
     		 e.printStackTrace();
     	}
-
-		//String uri = "https://olympus--fis.cs40.my.salesforce.com/services/data/v42.0/query/?q=SELECT+id,Name+from+Account";
-		System.out.println("Run:      " + uri );
-		System.out.println(appKey );
+	*/
+		
+		//System.out.println("Run:      " + uri );
+		//System.out.println(appKey );
 		
 		Client client = Client.create();
 		WebResource webresrc = client.resource(uri);
@@ -188,39 +207,64 @@ public class SfClient  extends HttpServlet {
 		    .get(ClientResponse.class);
 		if (response.getStatus() == 200) {
 			 jsonStr = response.getEntity(String.class);
+		}		
+		return jsonStr;  
+    }
+    /******************************************************************************************************************************************************************/	
+    public static void getJsonData(String responseValue) {
+    	
+		JSONObject myResponse = new JSONObject(responseValue);
+		String name = "";
+		String id = "";
+		Iterator iterator = myResponse.keys();
+		String key = null;
+		while (iterator.hasNext()) {
+			key = (String) iterator.next();
+			// System.out.println("**** Key:" + key + "--" + "Value:" + key.valueOf(key));
 		}
-		
-		return jsonStr;
-		
-     
+		JSONArray recsArr = (JSONArray) myResponse.getJSONArray("records");
+		//System.out.println("**** JSON_Array Length:" + recsArr.length());
+		//System.out.println("**** JSON_Array:" + recsArr);
+
+		JSONObject recs = recsArr.getJSONObject(0);
+		name = recs.getString("Name");
+		id = recs.getString("Id");
+		System.out.println("**** JSON_OBJ -> (Name):" + name + "--"  + " (ID):"  + id + "--");
+    	// Add values to a HashMap
     }
     /******************************************************************************************************************************************************************/	
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		String retValue = "";
-		//response.getWriter().append("Served at: ").append(request.getContextPath());
+		String uriQuery = "";
+		String acct = "Test Rest";
+
+		// response.getWriter().append("Served at: ").append(request.getContextPath());
 		PrintWriter out = response.getWriter();
 		String uri = new String();
 		String loginURL = new String();
 		String token = new String();
 		String propFile = "C:\\Java_Dev\\props\\salesforce\\key.properties";
-		// System.out.println("\n -------");
 		getProperties(propFile);
 		// Assemble the login request URL
-				loginURL = LOGINURL + GRANTSERVICE + "&client_id=" + CLIENTID + "&client_secret=" + CLIENTSECRET + "&username="
-						+ USERNAME + "&password=" + PASSWORD;
-				// System.out.println(loginURL);
-				token = getAccessToken(loginURL);
-				System.out.println("Access token: " + token);
-				// end getting oAuth token
-				
-		retValue = runURI(token);
-		//out.write("<br> in doGet()-- Returned: " + retValue);
+		loginURL = LOGINURL + GRANTSERVICE + "&client_id=" + CLIENTID + "&client_secret=" + CLIENTSECRET + "&username="
+				+ USERNAME + "&password=" + PASSWORD;
+		// System.out.println(loginURL);
+		token = getAccessToken(loginURL);
+		System.out.println("Access token: " + token);
+		
+		try {
+		    uriQuery = "https://olympus--fis.cs40.my.salesforce.com/services/data/v42.0/query/?q=SELECT+id,Name+from+Account+where+Name+=+'" 
+		    		+ URLEncoder.encode(acct, "UTF-8") + "'";     
+		    //String uriQuery = "https://olympus--fis.cs40.my.salesforce.com/services/data/v42.0/query/?q=SELECT+id,Name+from+Account";
+    	} catch (UnsupportedEncodingException e) {
+    		 e.printStackTrace();
+    	}	
+		retValue = runURI(token, uriQuery);
 		out.write(retValue);
+		getJsonData(retValue);	    
 	}
     /******************************************************************************************************************************************************************/	
-
- 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
  
 	}
