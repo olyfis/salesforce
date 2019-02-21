@@ -28,6 +28,16 @@
 		<url-pattern>/runuri</url-pattern>
 	</servlet-mapping>
 	
+	<servlet>
+		<servlet-name>Get Data</servlet-name>
+	<servlet-class>com.olympus.fis.sfclient.SfGetObjData</servlet-class>
+  </servlet>
+	<servlet-mapping>
+		<servlet-name>Get Data</servlet-name>
+		<url-pattern>/getdata</url-pattern>
+	</servlet-mapping>
+	
+	
 	
 	
 </web-app>
