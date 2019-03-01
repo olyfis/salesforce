@@ -10,6 +10,15 @@
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
   
+  <context-param> 
+   <description>Location to store uploaded file</description> 
+   <param-name>file-upload</param-name> 
+   <param-value>
+      D:\Pentaho\Kettle\RollOver\Upload\
+   </param-value> 
+</context-param>
+  
+  
   <servlet>
 	<servlet-name>SF Get Token</servlet-name>
 	<servlet-class>com.olympus.fis.sfclient.GetSfToken</servlet-class>
@@ -37,7 +46,14 @@
 		<url-pattern>/getdata</url-pattern>
 	</servlet-mapping>
 	
-	
+	<servlet>
+		<servlet-name>RollOverUpdate</servlet-name>
+	<servlet-class>com.olympus.fis.sfclient.RollOverUpdate</servlet-class>
+  </servlet>
+	<servlet-mapping>
+		<servlet-name>RollOverUpdate</servlet-name>
+		<url-pattern>/rollover</url-pattern>
+	</servlet-mapping>
 	
 	
 </web-app>

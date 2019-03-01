@@ -1,4 +1,5 @@
 package com.olympus.fis.sfclient;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,12 +38,18 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
-public class SfGetObjData  extends HttpServlet { 
-	
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+public class SfGetObjData extends HttpServlet {
+
 	public static final String USERID = "uuid"; // http://localhost:8181/sfclient/getdata?qt=uuid&id=Test+Rest
 	public static final String USERALL = "uall"; // http://localhost:8181/sfclient/getdata?qt=uall
 	public static final String ACCTDET = "actd"; // http://localhost:8181/sfclient/getdata?qt=actd
-	
+	public static final String CONTRACTDATA = "cntd"; // https://olympus--fis.cs40.my.salesforce.com/services/data/v20.0/sobjects/FIS_Contract__c
+
 	static String USERNAME = null;
 	static String PASSWORD = null;
 	static String LOGINURL = null;
@@ -54,16 +61,15 @@ public class SfGetObjData  extends HttpServlet {
 	static String baseUri = null;
 	static Header oauthHeader = null;
 	static Header prettyPrintHeader = new BasicHeader("X-PrettyPrint", "1");
-	
-	
-	
-	/******************************************************************************************************************************************************************/	
+
+	/******************************************************************************************************************************************************************/
 
 	public SfGetObjData() {
 		super();
 	}
-	/******************************************************************************************************************************************************************/	
-	/******************************************************************************************************************************************************************/	
+
+	/******************************************************************************************************************************************************************/
+	/******************************************************************************************************************************************************************/
 	public static void getProperties(String propFile) {
 		FileInputStream fis = null;
 		Properties keyProps = new Properties();
@@ -87,26 +93,26 @@ public class SfGetObjData  extends HttpServlet {
 		REST_ENDPOINT = (String) keyProps.get("REST_ENDPOINT");
 		API_VERSION = (String) keyProps.get("API_VERSION");
 	}
-	/******************************************************************************************************************************************************************/	
+	/******************************************************************************************************************************************************************/
+
 	/**********************************************************************************************************/
 	// Get Access oAuth2 token
 	/**********************************************************************************************************/
 	public static String getAccessToken() {
 		String loginAccessToken = null;
 		String loginInstanceUrl = null;
-		
+
 		HttpClient httpclient = HttpClients.createDefault();
- 
+
 		String loginURL = new String();
-		
+
 		String propFile = "C:\\Java_Dev\\props\\salesforce\\key.properties";
 		getProperties(propFile);
 		// Assemble the login request URL
 		loginURL = LOGINURL + GRANTSERVICE + "&client_id=" + CLIENTID + "&client_secret=" + CLIENTSECRET + "&username="
 				+ USERNAME + "&password=" + PASSWORD;
 		// System.out.println(loginURL);
-		
-		
+
 		// Login requests must be POSTs
 		HttpPost httpPost = new HttpPost(loginURL);
 		HttpResponse response = null;
@@ -128,7 +134,7 @@ public class SfGetObjData  extends HttpServlet {
 			return "No Connection";
 		}
 		String getResult = null;
-		
+
 		try {
 			getResult = EntityUtils.toString(response.getEntity());
 		} catch (IOException ioException) {
@@ -144,11 +150,11 @@ public class SfGetObjData  extends HttpServlet {
 		}
 		/*
 		 * 
-		System.out.println(response.getStatusLine());
-		System.out.println("Successful login");
-		System.out.println("  instance URL: " + loginInstanceUrl);
-		System.out.println("  access token/session ID: " + loginAccessToken);
-	*/	
+		 * System.out.println(response.getStatusLine());
+		 * System.out.println("Successful login"); System.out.println("  instance URL: "
+		 * + loginInstanceUrl); System.out.println("  access token/session ID: " +
+		 * loginAccessToken);
+		 */
 		// New code
 		baseUri = loginInstanceUrl + REST_ENDPOINT + API_VERSION;
 		oauthHeader = new BasicHeader("Authorization", "OAuth " + loginAccessToken);
@@ -158,50 +164,47 @@ public class SfGetObjData  extends HttpServlet {
 		 * System.out.println("instance URL: " + loginInstanceUrl);
 		 */
 		// System.out.println("access token/session ID: " + loginAccessToken);
-		//System.out.println("***** baseUri: " + baseUri);
+		// System.out.println("***** baseUri: " + baseUri);
 		// release connection
 
 		httpPost.releaseConnection();
 
 		return loginAccessToken;
 	}
-	
-	/******************************************************************************************************************************************************************/	
-	public static String runURI(String token, String uri) {
-    	//String uri = "";	 
-    	String jsonStr = "[{\"Status\" : \"Failed\" }] ";
-    	String appKey = "";
-    	appKey = token;
 
-		
-		//System.out.println("Run:      " + uri );
-		//System.out.println(appKey );
-		
+	/******************************************************************************************************************************************************************/
+	public static String runURI(String token, String uri) {
+		// String uri = "";
+		String jsonStr = "{\"Status\" : \"Failed\" } ";
+		String appKey = "";
+		appKey = token;
+
+		// System.out.println("Run: " + uri );
+		// System.out.println(appKey );
+
 		Client client = Client.create();
 		WebResource webresrc = client.resource(uri);
 		appKey = "Bearer " + appKey; // appKey is unique number
 		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
- 
-	 
+
 		ClientResponse response = null;
-		response = webresrc.queryParams(queryParams)
-		                        .header("Content-Type", "application/x-www-form-urlencoded")
-		    .header("Authorization", appKey)
-		    .get(ClientResponse.class);
+		response = webresrc.queryParams(queryParams).header("Content-Type", "application/x-www-form-urlencoded")
+				.header("Authorization", appKey).get(ClientResponse.class);
 		if (response.getStatus() == 200) {
-			 jsonStr = response.getEntity(String.class);
-		}		
-		return jsonStr;  
-    }
-	/******************************************************************************************************************************************************************/	
-    public static void getJsonData(String responseValue, String srch) {
-    	JSONObject myResponse = null;
-    	
-    	if (! responseValue.isEmpty()) {
-    		myResponse = new JSONObject(responseValue);
-    	} else {
-    		return ;
-    	}
+			jsonStr = response.getEntity(String.class);
+		}
+		return jsonStr;
+	}
+
+	/******************************************************************************************************************************************************************/
+	public static void getJsonData(String responseValue, String srch) {
+		JSONObject myResponse = null;
+
+		if (!responseValue.isEmpty()) {
+			myResponse = new JSONObject(responseValue);
+		} else {
+			return;
+		}
 		String name = "";
 		String id = "";
 		Iterator iterator = myResponse.keys();
@@ -211,189 +214,203 @@ public class SfGetObjData  extends HttpServlet {
 			System.out.println("**** Key:" + key + "--" + "Value:" + key.valueOf(key));
 		}
 		JSONArray recsArr = (JSONArray) myResponse.getJSONArray(srch);
-		//System.out.println("**** JSON_Array Length:" + recsArr.length());
-		//System.out.println("**** JSON_Array:" + recsArr);
+		// System.out.println("**** JSON_Array Length:" + recsArr.length());
+		// System.out.println("**** JSON_Array:" + recsArr);
 
 		if (recsArr.length() > 0) {
 			JSONObject recs = recsArr.getJSONObject(0);
 			name = recs.getString("Name");
 			id = recs.getString("Id");
-			System.out.println("**** JSON_OBJ -> (Name):" + name + "--"  + " (ID):"  + id + "--");
+			System.out.println("**** JSON_OBJ -> (Name):" + name + "--" + " (ID):" + id + "--");
 		}
-    	// Add values to a HashMap
-    }
-    /******************************************************************************************************************************************************************/	
-    public static String getQueryType(String token, String qType, HttpServletRequest request) {
+		// Add values to a HashMap
+	}
+
+	/******************************************************************************************************************************************************************/
+	public static String getQueryType(String token, String qType, HttpServletRequest request) {
 		String uriQuery = "";
 		String acct = "";
 		String retVal = "";
 		String op = "";
 		String runOK = "true";
-		
-		//System.out.println("qType=" + qType + " Access token: " + token);
-		if ( qType != null) {
+
+		// System.out.println("qType=" + qType + " Access token: " + token);
+		if (qType != null) {
 			op = qType.toLowerCase();
-		} else  {
+		} else {
 			op = "";
 			runOK = "false";
 		}
 		try {
-			 //System.out.println("****^^^^^***** qType=" + qType + "-- OP=" + op + "--" );
+			// System.out.println("****^^^^^***** qType=" + qType + "-- OP=" + op + "--" );
 			if (op.matches(USERALL)) {
-				//System.out.println("****^^^^^***** qType=" + qType );
+				// System.out.println("****^^^^^***** qType=" + qType );
 				uriQuery = "https://olympus--fis.cs40.my.salesforce.com/services/data/v42.0/query/?q=SELECT+id,Name+from+Account";
-				
-				
+
 			} else if (op.matches(USERID)) {
 				String idParam = "id";
 				String idValue = request.getParameter(idParam);
 				acct = idValue;
-				 System.out.println("****^^^^^***** ID=" + idValue );
-				uriQuery = "https://olympus--fis.cs40.my.salesforce.com/services/data/v42.0/query/?q=SELECT+id,Name+from+Account+where+Name+=+'" 
-		    		+ URLEncoder.encode(acct, "UTF-8") + "'";  
-				//System.out.println(uriQuery);
-						
-			} else if (op.matches(ACCTDET)) {	
-				System.out.println("******^^^^^ OP=" +op);
+				System.out.println("****^^^^^***** ID=" + idValue);
+				uriQuery = "https://olympus--fis.cs40.my.salesforce.com/services/data/v42.0/query/?q=SELECT+id,Name+from+Account+where+Name+=+'"
+						+ URLEncoder.encode(acct, "UTF-8") + "'";
+				// System.out.println(uriQuery);
+
+			} else if (op.matches(ACCTDET)) {
+				System.out.println("******^^^^^ OP=" + op);
 				uriQuery = "https://olympus--fis.cs40.my.salesforce.com/services/data/v20.0/sobjects/Account/0015400000FHdeCAAT";
 				String idParam = "id";
 				String idValue = request.getParameter(idParam);
-				//System.out.println(uriQuery);
-				
-			} else {
+				// System.out.println(uriQuery);
+
+			} else if (op.matches(CONTRACTDATA)) {
+				System.out.println("******^^^^^ OP=" + op);
+				uriQuery = "https://olympus--fis.cs40.my.salesforce.com/services/data/v20.0/sobjects/FIS_Contract__c";
+				/*
+				 * String idParam = "id"; String idValue = request.getParameter(idParam);
+				 * //System.out.println(uriQuery);
+				 */
+			}
+
+			else {
 				runOK = "false";
 			}
-    	} catch (UnsupportedEncodingException e) {
-    		 e.printStackTrace();
-    	}	
-		
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
 		if (runOK.equals("true")) {
 			retVal = runURI(token, uriQuery);
 			System.out.println("Return Value: " + retVal);
-    	}
-		return(retVal);
-    	
-    }
-    /******************************************************************************************************************************************************************/	
+		}
+		return (retVal);
 
-    public static boolean isJSONValid(String test) {
-        try {
-            new JSONObject(test);
-        } catch (JSONException ex) {
-            // e.g. in case JSONArray is valid as well...
-            try {
-                new JSONArray(test);
-            } catch (JSONException ex1) {
-                return false;
-            }
-        }
-        return true;
-    }
-    /******************************************************************************************************************************************************************/	
-    public static void idJsonObjType(String jsonStr) {
-    	JSONObject jsonObj = null;  
+	}
+
+	/******************************************************************************************************************************************************************/
+
+	public static boolean isJSONValid(String test) {
+		try {
+			new JSONObject(test);
+		} catch (JSONException ex) {
+			// e.g. in case JSONArray is valid as well...
+			try {
+				new JSONArray(test);
+			} catch (JSONException ex1) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/******************************************************************************************************************************************************************/
+	public static void idJsonObjType(String jsonStr) {
+		JSONObject jsonObj = null;
 		// String response = "above is my response";
-    	Boolean arrStatus = false;
-    	
-		if (jsonStr != null && isJSONValid(jsonStr)) { 
+		Boolean arrStatus = false;
+
+		if (jsonStr != null && isJSONValid(jsonStr)) {
 			jsonObj = new JSONObject(jsonStr);
 			Iterator iterator = jsonObj.keys();
 			String key = null;
 			while (iterator.hasNext()) {
 				key = (String) iterator.next();
-				//System.out.println("****^^^^^^^**** Key:" + key + "--" + "Value:" + jsonObj.get(key));
+				// System.out.println("****^^^^^^^**** Key:" + key + "--" + "Value:" +
+				// jsonObj.get(key));
 				Object Obj = jsonObj.get(key);
 				arrStatus = isJsonObjArray(jsonObj, key);
 				if (arrStatus) {
 					System.out.println("****^^^^^^^**** Key:" + key + "--" + "is a JSONArray");
 				}
-				
+
 				/*
-				if (Obj instanceof String) {
-					System.out.println("Key=" + key + " ********** Value is String...........");
-				} else if (Obj instanceof Integer) {
-					System.out.println("Key=" + key + " ********** Value is Integer...........");
-				} else if (Obj instanceof JSONArray) {
-					System.out.println("Key=" + key + " ********** Value is JSONArray...........");
-				} else if (Obj instanceof Boolean) {
-					System.out.println("Key=" + key + " ********** Value is Boolean...........");
-				}
-				*/
+				 * if (Obj instanceof String) { System.out.println("Key=" + key +
+				 * " ********** Value is String..........."); } else if (Obj instanceof Integer)
+				 * { System.out.println("Key=" + key +
+				 * " ********** Value is Integer..........."); } else if (Obj instanceof
+				 * JSONArray) { System.out.println("Key=" + key +
+				 * " ********** Value is JSONArray..........."); } else if (Obj instanceof
+				 * Boolean) { System.out.println("Key=" + key +
+				 * " ********** Value is Boolean..........."); }
+				 */
 			}
 		}
-    }
-    /******************************************************************************************************************************************************************/	
-    public static Boolean isJsonObjArray(JSONObject jsonObj, String key) {
-    	
-    	//System.out.println("****^^^^^^^**** Key:" + key + "--" + "Value:" + jsonObj.get(key));
-    	Object Obj = jsonObj.get(key);
-    	if (Obj instanceof JSONArray) {
+	}
+
+	/******************************************************************************************************************************************************************/
+	public static Boolean isJsonObjArray(JSONObject jsonObj, String key) {
+
+		// System.out.println("****^^^^^^^**** Key:" + key + "--" + "Value:" +
+		// jsonObj.get(key));
+		Object Obj = jsonObj.get(key);
+		if (Obj instanceof JSONArray) {
 			System.out.println("Key=" + key + " ********** Value is Array...........");
 			return true;
 		}
-    	return false; 	
-    }
-    /******************************************************************************************************************************************************************/	
-    public static void parseJsonData(String jsonStr) {
-    	JSONObject jsonObj = null;   
- 
-    	System.out.println("***********************************************************************************");
-    	if ( jsonStr != null && isJSONValid(jsonStr)) {
-    		jsonObj = new JSONObject(jsonStr);
-    	} else {
-    		System.out.println("JSON string is not valid JSON");
-    		return ;
-    	}
-    	idJsonObjType(jsonStr);
-    	
-    	/*
-    	//System.out.println("JO=" + jsonObj);
-    	Iterator iterator = jsonObj.keys();
-		String key = null;	
+		return false;
+	}
 
-		while (iterator.hasNext()) {
-			key = (String) iterator.next();
-			 System.out.println("**** Key:" + key + "--" + "Value:" + jsonObj.get(key));
+	/******************************************************************************************************************************************************************/
+	public static void parseJsonData(String jsonStr) {
+		JSONObject jsonObj = null;
+		System.out.println("jsonStr:" + jsonStr);
+		System.out.println("***********************************************************************************");
+		if (jsonStr != null && isJSONValid(jsonStr)) {
+			jsonObj = new JSONObject(jsonStr);
+		} else {
+			System.out.println("JSON string is not valid JSON");
+			return;
 		}
-	
-    	*/
-    }
-    
-    /******************************************************************************************************************************************************************/	
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		 
-    	// response.getWriter().append("Served at: ").append(request.getContextPath());
-    	String jsonStr = "[{\"Status\" : \"Failed\" }] ";
-    	PrintWriter out = response.getWriter();
-    	JSONArray jsonArr = new JSONArray();
-    	String qType = "qt";
-		String qTypeValue = request.getParameter(qType); 
-		//System.out.println("^^^^^^^ qTypeValue=" + qTypeValue);
-    	String token = new String();
+		idJsonObjType(jsonStr);
+
+		JsonElement root = new JsonParser().parse(jsonStr);
+		JsonObject object = root.getAsJsonObject().get("records").getAsJsonObject();
+		Map<String, String> map = new Gson().fromJson(object.toString(), Map.class);
+		System.out.println("MAP:" + map);
+
+		/*
+		 * //System.out.println("JO=" + jsonObj); Iterator iterator = jsonObj.keys();
+		 * String key = null;
+		 * 
+		 * while (iterator.hasNext()) { key = (String) iterator.next();
+		 * System.out.println("**** Key:" + key + "--" + "Value:" + jsonObj.get(key)); }
+		 * 
+		 */
+	}
+
+	/******************************************************************************************************************************************************************/
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		// response.getWriter().append("Served at: ").append(request.getContextPath());
+		String jsonStr = "[{\"Status\" : \"Failed\" }] ";
+		PrintWriter out = response.getWriter();
+		JSONArray jsonArr = new JSONArray();
+		String qType = "qt";
+		String qTypeValue = request.getParameter(qType);
+		// System.out.println("^^^^^^^ qTypeValue=" + qTypeValue);
+		String token = new String();
 		String retValue = "";
 		token = getAccessToken();
 		retValue = getQueryType(token, qTypeValue, request);
 
-		
-	 /*
-		if (retValue.equals("failed")) {
-			retValue = jsonStr;
-		} else {
-			//getJsonData(retValue, "records");
-			
-			
-		}
-	 */
+		/*
+		 * if (retValue.equals("failed")) { retValue = jsonStr; } else {
+		 * //getJsonData(retValue, "records");
+		 * 
+		 * 
+		 * }
+		 */
 		out.write(retValue);
 		parseJsonData(retValue);
-			    
-	}
-    /******************************************************************************************************************************************************************/	
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
- 
-	}
-	/******************************************************************************************************************************************************************/	
 
-	
+	}
+
+	/******************************************************************************************************************************************************************/
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+	}
+	/******************************************************************************************************************************************************************/
 
 }

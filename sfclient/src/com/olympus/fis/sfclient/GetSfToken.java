@@ -49,13 +49,9 @@ public class GetSfToken  extends HttpServlet {
 	static String baseUri = null;
 	static Header oauthHeader = null;
 	static Header prettyPrintHeader = new BasicHeader("X-PrettyPrint", "1");
-	
- 
- 
 	public GetSfToken() {
 		super();
 		// TODO Auto-generated constructor stub
-
 	}
 	/******************************************************************************************************************************************************************/	
 	public static void getProperties(String propFile) {
@@ -117,11 +113,7 @@ public class GetSfToken  extends HttpServlet {
 		} catch (IOException ioException) {
 			// Handle system IO exception
 		}
-		
-	 
 		JSONObject jsonObject = null;
-		
-
 		try {
 			jsonObject = (JSONObject) new JSONTokener(getResult).nextValue();
 			loginAccessToken = jsonObject.getString("access_token");
@@ -152,13 +144,9 @@ public class GetSfToken  extends HttpServlet {
 
 		return loginAccessToken;
 	}
-	
 	/******************************************************************************************************************************************************************/	
-
     public static String runURI(String token) {
     	String uri = "";
-     
-    	 
     	String jsonStr = "[{\"Status\" : \"Failed\" }] ";
     	String acct = "Test Rest";
     	//String appKey = "00D540000000fMN!ARgAQLuB5pEMHt8KDJYMV3jJgiSdKt92eOgSC3xMwrwMlH9mOCnjv8mopMu.hcdRnfbLsOx1yBI__IMcCUKM3De7Vkei_OQZ";
@@ -188,11 +176,8 @@ public class GetSfToken  extends HttpServlet {
 		    .get(ClientResponse.class);
 		if (response.getStatus() == 200) {
 			 jsonStr = response.getEntity(String.class);
-		}
-		
-		return jsonStr;
-		
-     
+		}	
+		return jsonStr; 
     }
     /******************************************************************************************************************************************************************/	
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -219,12 +204,9 @@ public class GetSfToken  extends HttpServlet {
 		out.write(token);
 	}
     /******************************************************************************************************************************************************************/	
-
- 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
  
-	}
-    
+	}    
     /******************************************************************************************************************************************************************/	
     /******************************************************************************************************************************************************************/	
     /******************************************************************************************************************************************************************/	

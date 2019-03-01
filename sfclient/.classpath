@@ -15,5 +15,10 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="lib" path="C:/Java_Dev/lib/javax.ws.rs-api-2.0.1.jar"/>
 	<classpathentry kind="lib" path="C:/Java_Dev/lib/jersey-bundle-1.9.1.jar"/>
+	<classpathentry kind="lib" path="C:/Java_Dev/lib/gson-2.8.2.jar"/>
+	<classpathentry kind="lib" path="C:/Java_Dev/lib/olyutil.jar"/>
+	<classpathentry kind="lib" path="C:/Java_Dev/lib/SF_libs/apache-commons.jar"/>
+	<classpathentry kind="lib" path="C:/Java_Dev/lib/commons-fileupload-1.4.jar"/>
+	<classpathentry kind="lib" path="C:/Java_Dev/lib/commons-io-2.6.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
