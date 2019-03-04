@@ -93,12 +93,12 @@ $(function() {
 	  <tr bgcolor="#5DADE2"  style="font-family: sans-serif; color: white;" >
 	  
 	   <th class="a" >Select File</th>  
- <th class="a" >Submit </th>
+ <th class="a" >Action</th>
 
 	  </tr>
 	   <tr>
   <td bgcolor="#AEB6BF"> <input type = "file" name = "file" size = "50" /></td>
-	 <td bgcolor="#AEB6BF"><input type = "submit" value = "Upload File" /></td>
+	 <td bgcolor="#AEB6BF"><input type = "submit" value = "Deliver File" /></td>
 	 
 	   </tr> </table> 
 	   </form>

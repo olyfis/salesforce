@@ -94,10 +94,9 @@ public static Connection  getDbConnection() {
 
 
 /*******************************************************************************************************************************************************************/
-public static Boolean  checkRecExists(Connection connection, String ID ) throws Exception {
+public static void  checkRecExists(Connection connection, String ID ) throws Exception {
 	Statement statement = null;
 	ResultSet resultSet = null;
-	Boolean recExists = false;
 	
 	try {	
 		if (connection != null) {
@@ -113,16 +112,10 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
 	} catch (Exception e) {
 		e.printStackTrace();
 	}	 
-
 	while(resultSet.next()){		
-		//System.out.println("****^^^^**** RS=" + resultSet.getString("ContractID"));
-		if (resultSet.getString("ContractID").equals(ID)) {
-			recExists = true;
-		}	
+		System.out.println("****^^^^**** RS=" + resultSet.getString("ContractID"));
 	}
  
- 
-	return recExists;
 }
 /*******************************************************************************************************************************************************************/
 
@@ -147,7 +140,6 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
    String rowEven = "#D7DBDD";
    String rowOdd = "AEB6BF";
    String rowColor = "";
-   Boolean chkRtn = false;
    // Verify the content type
    String contentType = request.getContentType();
    
@@ -217,11 +209,6 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
                out.println("</tr>");
                
                for (int j = 0; j < dataArr.size(); j++) {
-            	   
-            	   
-            	   
-            	   
-            	   
           			 rowColor = (j % 2 == 0) ? rowEven : rowOdd;
           			 out.println("<tr bgcolor=" + rowColor + ">");
           	
@@ -229,16 +216,12 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
           		 
           			String token_list[] = xDataItem.split(",");
           			String idVal = token_list[0];
-          			chkRtn = checkRecExists(conn, idVal);
-          			if (chkRtn.equals(true)) {
-          				out.println("<td> Exists</td>");
-          			} else {
-          				out.println("<td> Insert</td>");
-          			}
+          			 checkRecExists(conn, idVal);
+          			
                
              
               // out.println("<tr>");
-               
+               out.println("<td> Insert</td>");
                for (int x = 0; x < token_list.length; x++) {
             	  
      				out.println("<td>" + token_list[x] +"</td>");
