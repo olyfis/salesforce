@@ -4,6 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.CopyOption;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,9 +33,23 @@ public class RollOverUpdate extends HttpServlet {
 	static ResultSet res  = null;
 	
 	static String sqlFileName =   "C:\\Java_Dev\\props\\sql\\test.sql";
-
+	static String mvUploadDir =   "D:\\Pentaho\\Kettle\\RollOver\\Uploaded\\";
 	/******************************************************************************************************************************************************************/	
-	 public String get_query(String sqlFilePath ) throws Exception {
+	public static String baseName(String path) {
+		String filename = "";
+		System.out.println("PATH=" + path);
+		String[] pathparts = path.split("\\\\");
+		filename = pathparts[pathparts.length - 1];
+		System.out.println("FN=" + filename);
+		return filename;
+	}
+	/******************************************************************************************************************************************************************/	
+
+
+
+/******************************************************************************************************************************************************************/	
+
+public String get_query(String sqlFilePath ) throws Exception {
 		 String queryStr = "";
 		 
 			String s = new String();
@@ -59,7 +79,7 @@ public class RollOverUpdate extends HttpServlet {
 		res = util.getResultSetPS(statement);	 
 		strArr = util.resultSetArray(res, sep);			
 		//System.out.println("**** arrSize=" + strArr.size()  );
-		System.out.println("**** arr:" + strArr.toString());	
+		//System.out.println("**** arr:" + strArr.toString());	
 		//result = jutil.displayResults(res);
 		try {
 			if (stmt != null) {
@@ -72,10 +92,29 @@ public class RollOverUpdate extends HttpServlet {
 	/******************************************************************************************************************************************************************/	
 	public ArrayList<String> getDBInput(String inputFilePath, Olyutil util) throws Exception {
 		ArrayList<String> inputArr = new ArrayList<String>();
- 
-		inputArr = util.readInputFile(inputFilePath); // Read CSV file
-		//util.printStrArray(inputArr, "strArray");
+		
+		String srcFile = util.baseName(inputFilePath);
+		String readFilePath = mvUploadDir + srcFile;
+		 
+		util.moveFile(inputFilePath, readFilePath);
+		//inputArr = util.readInputFile(inputFilePath); // Read CSV file
+		inputArr = util.readInputFile(readFilePath); // Read CSV file
+		
+		System.out.println("*** IF: " + readFilePath + " BaseName: " + srcFile);
+		util.printStrArray(inputArr, "strArray");
+		
 		return inputArr;
+		
+		
+ /*
+		inputArr = util.readInputFile(inputFilePath); // Read CSV file
+		String srcFile = baseName(inputFilePath);
+		System.out.println("*** IF: " + inputFilePath + " BaseName: " + srcFile);
+		util.printStrArray(inputArr, "strArray");
+		moveFile(inputFilePath, mvUploadDir + srcFile);
+		return inputArr;
+		*/
+		
 	}
 	/******************************************************************************************************************************************************************/	
 	public ArrayList<String> getDbInputFileName(String uploadDir) throws Exception {
@@ -83,15 +122,16 @@ public class RollOverUpdate extends HttpServlet {
 		
 		File f = new File(uploadDir); // current directory
 		File[] files = f.listFiles();
+ 
 		for (File file : files) {
 			if (file.isDirectory()) {
 				System.out.print("****^^^^**** directory: ");
 			} else {
 				//System.out.print("     file: ");	
 			}
-			//System.out.println(file.getCanonicalPath());
+			 
 			fileListArr.add(file.getCanonicalPath());
-		}
+		}	
 		return fileListArr;
 	}
 	/******************************************************************************************************************************************************************/	
@@ -152,13 +192,13 @@ protected Boolean do_InsertDbRec(Connection con, Olyutil util, String sqlFilePat
 		String insertQuery = new String();
 		insertQuery = get_query(sqlFilePath);
 		//System.out.println("****^^^^ 1=" + data[0] + " 2=" + data[1] + " 3=" + data[2] + " 3=" + data[3]);
-		System.out.println("****^^^^ 1=" + data[0] + " 2=" + data[1] + " 3=" + data[2]  );
+		//System.out.println("****^^^^ 1=" + data[0] + " 2=" + data[1] + " 3=" + data[2]  );
 		
-		System.out.println("**** Query: " + insertQuery);
+		//System.out.println("**** Query: " + insertQuery);
 		
- 
+		int id1 = Integer.parseInt(data[0]);
 		statement = con.prepareStatement(insertQuery);	
-		statement.setString(1, data[0]);
+		statement.setInt(1, id1);
 		statement.setString(2, data[1]);
 		statement.setString(3, data[2]);
 		statement.executeUpdate();
@@ -182,7 +222,7 @@ protected Boolean do_InsertDbRec(Connection con, Olyutil util, String sqlFilePat
 		return status;
 	}
 	/******************************************************************************************************************************************************************/	
-	protected void doInsert() throws ServletException, IOException {
+	public void doInsert() throws ServletException, IOException {
 		Connection conn = null;
 		// String sqlFilePath = "C:\\Java_Dev\\props\\sql\\rollover\\test.sql";
 		String sqlFilePath = "C:\\Java_Dev\\props\\sql\\rollover\\checkID.sql";
@@ -201,25 +241,22 @@ protected Boolean do_InsertDbRec(Connection con, Olyutil util, String sqlFilePat
 			inputFileName = fileListArr.get(0);
 			if (inputFileName.length() > 0) {
 				inputArr = readDbInputFile(inputFileName, util);
-				// util.printStrArray(inputArr, "INPUT: ");
+				 //util.printStrArray(inputArr, "INPUT: ");
 			}
 			conn = do_init(propFilePath);
 			if (conn != null) {
 				// process input data
 				for (int x = 0; x < inputArr.size(); x++) {
-
 					splitstr = inputArr.get(x).split(",");
 					recID = splitstr[0];
-
-					// do_runQuery(conn, util, sqlFilePath, recID);
+					//System.out.println("**** Record: " + recID );
+					do_runQuery(conn, util, sqlFilePath, recID);
 					Boolean stat = do_checkDbRec(conn, util, sqlFilePath, recID);
 					if (stat.equals(false)) {
-						System.out.println("INSERT Record: " + recID + " Status=" + stat + " Arr= " + inputArr.get(x));
+						//System.out.println("INSERT Record: " + recID + " Status=" + stat + " Arr= " + inputArr.get(x));
 						do_InsertDbRec(conn, util, InsertSqlFilePath, splitstr);
 					}
-
 				}
-
 			} else {
 				System.out.println("Database connection: Failed");
 			}
@@ -239,7 +276,7 @@ protected Boolean do_InsertDbRec(Connection con, Olyutil util, String sqlFilePat
 	 
 		String paramName = "sqlType";
 		String paramValue = request.getParameter(paramName);
-		System.out.println("sqlType=" + paramName + " pVal=" + paramValue + "--");
+		//System.out.println("sqlType=" + paramName + " pVal=" + paramValue + "--");
 
 		if ((paramValue != null && !paramValue.isEmpty()) && paramValue.equals("INS")) {
 			doInsert();

@@ -103,7 +103,7 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
 		if (connection != null) {
 			statement = connection.createStatement();	
 			String sql = "SELECT  [ContractID] FROM [RollOverTest].[dbo].[RollOverTest2] where [ContractID] =  " + ID + "";
-			System.out.println("**** Query: " + sql);
+			//System.out.println("**** Query: " + sql);
 			resultSet = statement.executeQuery(sql);
 		} else {
 			System.out.println("**** Connection is null! ");
@@ -251,7 +251,7 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
                } // end outter loop
                out.println("</table> <BR>");
                %>
-               <form action = "/sfclient/rollover"  method = "get"  >
+               <form action = "/sfclient/readdata"  method = "get"  >
                <table  border="1" >
                	  <tr bgcolor="#5DADE2"  style="font-family: sans-serif; color: white;" >
                	  

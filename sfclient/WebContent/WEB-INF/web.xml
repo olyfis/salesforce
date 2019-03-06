@@ -54,6 +54,13 @@
 		<servlet-name>RollOverUpdate</servlet-name>
 		<url-pattern>/rollover</url-pattern>
 	</servlet-mapping>
-	
+	<servlet>
+		<servlet-name>ReadData</servlet-name>
+	<servlet-class>com.olympus.fis.sfclient.ReadData</servlet-class>
+  </servlet>
+	<servlet-mapping>
+		<servlet-name>ReadData</servlet-name>
+		<url-pattern>/readdata</url-pattern>
+	</servlet-mapping>
 	
 </web-app>
