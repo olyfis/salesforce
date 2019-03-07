@@ -94,16 +94,25 @@ public static Connection  getDbConnection() {
 
 
 /*******************************************************************************************************************************************************************/
-public static void  checkRecExists(Connection connection, String ID ) throws Exception {
+public static Boolean  checkRecExists(Connection connection, String ID ) throws Exception {
 	Statement statement = null;
 	ResultSet resultSet = null;
+	Boolean recExists = false;
 	
 	try {	
 		if (connection != null) {
 			statement = connection.createStatement();	
 			String sql = "SELECT  [ContractID] FROM [RollOverTest].[dbo].[RollOverTest2] where [ContractID] =  " + ID + "";
-			System.out.println("**** Query: " + sql);
+			//System.out.println("**** Query: " + sql);
 			resultSet = statement.executeQuery(sql);
+			/*
+			ResultSetMetaData rsmd = resultSet.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			for (int i = 1; i <= columnCount; i++ ) {
+				  String name = rsmd.getColumnName(i);
+				  System.out.println("**** ColCount: " + columnCount + " Name: " + name);
+				}
+			*/
 		} else {
 			System.out.println("**** Connection is null! ");
 		}
@@ -112,10 +121,16 @@ public static void  checkRecExists(Connection connection, String ID ) throws Exc
 	} catch (Exception e) {
 		e.printStackTrace();
 	}	 
+
 	while(resultSet.next()){		
-		System.out.println("****^^^^**** RS=" + resultSet.getString("ContractID"));
+		//System.out.println("****^^^^**** RS=" + resultSet.getString("ContractID"));
+		if (resultSet.getString("ContractID").equals(ID)) {
+			recExists = true;
+		}	
 	}
  
+ 
+	return recExists;
 }
 /*******************************************************************************************************************************************************************/
 
@@ -140,6 +155,7 @@ public static void  checkRecExists(Connection connection, String ID ) throws Exc
    String rowEven = "#D7DBDD";
    String rowOdd = "AEB6BF";
    String rowColor = "";
+   Boolean chkRtn = false;
    // Verify the content type
    String contentType = request.getContentType();
    
@@ -195,33 +211,55 @@ public static void  checkRecExists(Connection connection, String ID ) throws Exc
                String srcFile = filePath + "\\" + basename(fileName);
                //out.println("<h5>srcFile: " + srcFile + "</h5><br>");
                dataArr = readFileData(srcFile);
-              // out.println("dataArr size=" + dataArr.size() + "--");
+            	//out.println("******* dataArr size=" + dataArr.size() + "--");
                
               
               conn = getDbConnection();
              
                
                out.println("<table  border=\"1\" >  <tr bgcolor=\"#5DADE2\"  style=\"font-family: sans-serif; color: white;\" >");
+               
+              
+               out.println("<th class=\"a\" >DB Status </th>");
+               String line = dataArr.get(0);
+               String[] list = line.split(",");
+               int sz = list.length;
+               System.out.println("*** SZ=" + sz + "---");
+               
+               for (int m = 0; m <= sz; m++) {
+            	   if (m != 0) {
+            		    //out.println("<th class=\"a\" >Column " + (m - 1) + "</th>");
+            		    out.println("<th class=\"a\" >Column " + m  + "</th>");
+            		   
+            	   }
+               }
+               /*
                out.println("<th class=\"a\" >DB Status </th>");
                out.println("<th class=\"a\" >Column 1 </th>");
                out.println("<th class=\"a\" >Column 2 </th>");
                out.println("<th class=\"a\" >Column 3 </th>");
+               out.println("<th class=\"a\" >Column 4 </th>");
+               out.println("<th class=\"a\" >Column 5 </th>");
                out.println("</tr>");
-               
+               */
                for (int j = 0; j < dataArr.size(); j++) {
-          			 rowColor = (j % 2 == 0) ? rowEven : rowOdd;
+     				rowColor = (j % 2 == 0) ? rowEven : rowOdd;
           			 out.println("<tr bgcolor=" + rowColor + ">");
           	
           			xDataItem = dataArr.get(j);
           		 
           			String token_list[] = xDataItem.split(",");
           			String idVal = token_list[0];
-          			 checkRecExists(conn, idVal);
-          			
+          			chkRtn = checkRecExists(conn, idVal);
+          			if (chkRtn.equals(true)) {
+          				out.println("<td> Exists</td>");
+          			} else {
+          				out.println("<td> Insert</td>");
+          			}
                
              
               // out.println("<tr>");
-               out.println("<td> Insert</td>");
+               
                for (int x = 0; x < token_list.length; x++) {
             	  
      				out.println("<td>" + token_list[x] +"</td>");
@@ -234,7 +272,7 @@ public static void  checkRecExists(Connection connection, String ID ) throws Exc
                } // end outter loop
                out.println("</table> <BR>");
                %>
-               <form action = "/sfclient/rollover"  method = "get"  >
+               <form action = "/sfclient/readdata"  method = "get"  >
                <table  border="1" >
                	  <tr bgcolor="#5DADE2"  style="font-family: sans-serif; color: white;" >
                	  

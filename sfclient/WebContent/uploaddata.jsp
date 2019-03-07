@@ -105,6 +105,14 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
 			String sql = "SELECT  [ContractID] FROM [RollOverTest].[dbo].[RollOverTest2] where [ContractID] =  " + ID + "";
 			//System.out.println("**** Query: " + sql);
 			resultSet = statement.executeQuery(sql);
+			/*
+			ResultSetMetaData rsmd = resultSet.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			for (int i = 1; i <= columnCount; i++ ) {
+				  String name = rsmd.getColumnName(i);
+				  System.out.println("**** ColCount: " + columnCount + " Name: " + name);
+				}
+			*/
 		} else {
 			System.out.println("**** Connection is null! ");
 		}
@@ -203,13 +211,29 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
                String srcFile = filePath + "\\" + basename(fileName);
                //out.println("<h5>srcFile: " + srcFile + "</h5><br>");
                dataArr = readFileData(srcFile);
-              // out.println("dataArr size=" + dataArr.size() + "--");
+            	//out.println("******* dataArr size=" + dataArr.size() + "--");
                
               
               conn = getDbConnection();
              
                
                out.println("<table  border=\"1\" >  <tr bgcolor=\"#5DADE2\"  style=\"font-family: sans-serif; color: white;\" >");
+               
+              
+               out.println("<th class=\"a\" >DB Status </th>");
+               String line = dataArr.get(0);
+               String[] list = line.split(",");
+               int sz = list.length;
+               System.out.println("*** SZ=" + sz + "---");
+               
+               for (int m = 0; m <= sz; m++) {
+            	   if (m != 0) {
+            		    //out.println("<th class=\"a\" >Column " + (m - 1) + "</th>");
+            		    out.println("<th class=\"a\" >Column " + m  + "</th>");
+            		   
+            	   }
+               }
+               /*
                out.println("<th class=\"a\" >DB Status </th>");
                out.println("<th class=\"a\" >Column 1 </th>");
                out.println("<th class=\"a\" >Column 2 </th>");
@@ -217,14 +241,9 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
                out.println("<th class=\"a\" >Column 4 </th>");
                out.println("<th class=\"a\" >Column 5 </th>");
                out.println("</tr>");
-               
+               */
                for (int j = 0; j < dataArr.size(); j++) {
-            	   
-            	   
-            	   
-            	   
-            	   
-          			 rowColor = (j % 2 == 0) ? rowEven : rowOdd;
+     				rowColor = (j % 2 == 0) ? rowEven : rowOdd;
           			 out.println("<tr bgcolor=" + rowColor + ">");
           	
           			xDataItem = dataArr.get(j);
