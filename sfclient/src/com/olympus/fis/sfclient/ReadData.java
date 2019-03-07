@@ -8,7 +8,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -24,19 +27,14 @@ public class ReadData extends HttpServlet {
 	static Statement stmt = null;
 	static private PreparedStatement statement;
 	static ResultSet res  = null;
-	
- 
 	static String mvUploadDir =   "D:\\Pentaho\\Kettle\\RollOver\\Uploaded\\";
 	static String uploadDir = "D:\\Pentaho\\Kettle\\RollOver\\Upload";
 	/******************************************************************************************************************************************************************/
-
 	/******************************************************************************************************************************************************************/
-
 	public void doInsert() throws ServletException, IOException {
 		Connection conn = null;
 		String query = new String();
 		String sep = ",";
-		// String sqlFilePath = "C:\\Java_Dev\\props\\sql\\rollover\\test.sql";
 		String sqlFilePath = "C:\\Java_Dev\\props\\sql\\rollover\\checkID.sql";
 		String InsertSqlFilePath = "C:\\Java_Dev\\props\\sql\\rollover\\insert.sql";
 		String propFilePath = "C:\\\\Java_Dev\\\\props\\\\connectionRollOver.prop";
@@ -62,12 +60,8 @@ public class ReadData extends HttpServlet {
 					splitstr = inputArr.get(x).split(",");
 					recID = splitstr[0];
 					//System.out.println("**** Record: " + recID );
-					//
-				//do_runQuery(conn, util, sqlFilePath, recID);
 					query = util.do_getQuery(sqlFilePath);
-					//System.out.println("^^^ Query: " + query);
-					
-					
+					//System.out.println("^^^ Query: " + query);		
 					do_runQuery(conn, query, sep, recID);
 					Boolean stat = util.do_checkDbRec(conn, recID, query, sep);
 					if (stat.equals(false)) {
@@ -86,13 +80,10 @@ public class ReadData extends HttpServlet {
 		}
 	}
 	/******************************************************************************************************************************************************************/
- 
-		
 		public ArrayList<String> do_runQuery(Connection con, String query, String sep, String recID) throws Exception { // 
 
 		Olyutil util = new Olyutil();
-		ArrayList<String> strArr = new ArrayList<String>();	
-	 
+		ArrayList<String> strArr = new ArrayList<String>();		 
 		//System.out.println("**** Query: " + query);
 		statement = con.prepareStatement(query);	
 		statement.setString(1, recID);
@@ -110,28 +101,21 @@ public class ReadData extends HttpServlet {
 		} // end finally try
 		return strArr;
 	}
-	/******************************************************************************************************************************************************************/
-
-	
+	/******************************************************************************************************************************************************************/	
 	public ArrayList<String> getDBInput(String inputFilePath, Olyutil util) throws Exception {
 		ArrayList<String> inputArr = new ArrayList<String>();
 		String srcFile = util.baseName(inputFilePath);
-		String readFilePath = mvUploadDir + srcFile;
-		//util.moveFile(inputFilePath, mvUploadDir + srcFile);
+		String readFilePath = mvUploadDir + srcFile;	 
 		util.moveFile(inputFilePath, readFilePath);
-		//inputArr = util.readInputFile(inputFilePath); // Read CSV file
-		inputArr = util.readInputFile(readFilePath); // Read CSV file
-		
+		inputArr = util.readInputFile(readFilePath); // Read CSV file	
 		//System.out.println("*** IF: " + readFilePath + " BaseName: " + srcFile);
-		util.printStrArray(inputArr, "strArray");
-		
+		util.printStrArray(inputArr, "strArray");	
 		return inputArr;
 	}
 	/******************************************************************************************************************************************************************/
 	public Connection do_init(String propFilePath )  throws Exception {
 		 Olyutil util = new Olyutil();
-		 Connection conn = null;
-			 
+		 Connection conn = null;		 
 		try {
 			FileInputStream fis = new FileInputStream(propFilePath);
 	 		Properties connectionProps = new Properties();
@@ -149,23 +133,25 @@ public class ReadData extends HttpServlet {
 		ArrayList<String> strArr = new ArrayList<String>();	
 		String insertQuery = new String();
 		insertQuery = util.do_getQuery(sqlFilePath);
-		//System.out.println("****^^^^ 1=" + data[0] + " 2=" + data[1] + " 3=" + data[2] + " 3=" + data[3]);
-		//System.out.println("****^^^^ 1=" + data[0] + " 2=" + data[1] + " 3=" + data[2]  );
-		
-		//System.out.println("**** Query: " + insertQuery);
-		
+		System.out.println("****^^^^ 1=" + data[0] + " 2=" + data[1] + " 3=" + data[2] + " 4=" + data[3] + " 5=" + data[4] );	
+		//System.out.println("**** Query: " + insertQuery);		
 		int id1 = Integer.parseInt(data[0]);
-		statement = con.prepareStatement(insertQuery);	
+		int int1 = Integer.parseInt(data[4]);
+		java.sql.Date date;
+		date = new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse(data[3].substring(0, 10)).getTime());
+		statement = con.prepareStatement(insertQuery);
 		statement.setInt(1, id1);
 		statement.setString(2, data[1]);
 		statement.setString(3, data[2]);
+		statement.setDate(4, date);
+		statement.setInt(5, int1);
 		statement.executeUpdate();
-		
-		//res = util.getResultSetPS(statement);	 
-		//strArr = util.resultSetArray(res, sep);			
-		//System.out.println("**** arrSize=" + strArr.size()  );
-		//System.out.println("**** arr:" + strArr.toString());	
-		//result = jutil.displayResults(res);
+
+		// res = util.getResultSetPS(statement);
+		// strArr = util.resultSetArray(res, sep);
+		// System.out.println("**** arrSize=" + strArr.size() );
+		// System.out.println("**** arr:" + strArr.toString());
+		// result = jutil.displayResults(res);
 		if (strArr.size() > 0) {
 			status = true;
 		}
@@ -175,16 +161,14 @@ public class ReadData extends HttpServlet {
 			}
 		} catch (SQLException se) {
 			se.printStackTrace();
-		} // end finally try	
-		
+		} // end finally try
+
 		return status;
 	}
 	/******************************************************************************************************************************************************************/	
-	/******************************************************************************************************************************************************************/
-	
 	/******************************************************************************************************************************************************************/	
-	public void testMove() throws ServletException, IOException {
-		
+	/******************************************************************************************************************************************************************/	
+	public void testMove() throws ServletException, IOException {	
 		ArrayList<String> fileListArr = new ArrayList<String>();
 		ArrayList<String> inputArr = new ArrayList<String>();
 		Olyutil util = new Olyutil();
@@ -211,8 +195,7 @@ public class ReadData extends HttpServlet {
 	/******************************************************************************************************************************************************************/
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
-	 
+	
 		String paramName = "sqlType";
 		String paramValue = request.getParameter(paramName);
 		System.out.println("sqlType=" + paramName + " pVal=" + paramValue + "--");
@@ -222,9 +205,7 @@ public class ReadData extends HttpServlet {
 			System.out.println("sqlType=" + paramName + " pVal=" + paramValue + "--");
 			//testMove();
 		}
-
 	} // End doGet
 
 	/******************************************************************************************************************************************************************/
-
 }

@@ -214,6 +214,8 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
                out.println("<th class=\"a\" >Column 1 </th>");
                out.println("<th class=\"a\" >Column 2 </th>");
                out.println("<th class=\"a\" >Column 3 </th>");
+               out.println("<th class=\"a\" >Column 4 </th>");
+               out.println("<th class=\"a\" >Column 5 </th>");
                out.println("</tr>");
                
                for (int j = 0; j < dataArr.size(); j++) {
