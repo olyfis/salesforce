@@ -31,7 +31,7 @@ public class ReadData extends HttpServlet {
 	static String uploadDir = "D:\\Pentaho\\Kettle\\RollOver\\Upload";
 	/******************************************************************************************************************************************************************/
 	/******************************************************************************************************************************************************************/
-	public void doInsert() throws ServletException, IOException {
+	public ArrayList<String> doInsert() throws ServletException, IOException {
 		Connection conn = null;
 		String query = new String();
 		String sep = ",";
@@ -42,6 +42,7 @@ public class ReadData extends HttpServlet {
 		 
 		ArrayList<String> fileListArr = new ArrayList<String>();
 		ArrayList<String> inputArr = new ArrayList<String>();
+		
 		Olyutil util = new Olyutil();
 		String[] splitstr = null;
 		String recID = "";
@@ -78,6 +79,7 @@ public class ReadData extends HttpServlet {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		return inputArr;
 	}
 	/******************************************************************************************************************************************************************/
 		public ArrayList<String> do_runQuery(Connection con, String query, String sep, String recID) throws Exception { // 
@@ -109,7 +111,7 @@ public class ReadData extends HttpServlet {
 		util.moveFile(inputFilePath, readFilePath);
 		inputArr = util.readInputFile(readFilePath); // Read CSV file	
 		//System.out.println("*** IF: " + readFilePath + " BaseName: " + srcFile);
-		util.printStrArray(inputArr, "strArray");	
+		//util.printStrArray(inputArr, "strArray");	
 		return inputArr;
 	}
 	/******************************************************************************************************************************************************************/
@@ -134,7 +136,7 @@ public class ReadData extends HttpServlet {
 		String insertQuery = new String();
 		insertQuery = util.do_getQuery(sqlFilePath);
 		System.out.println("****^^^^ 1=" + data[0] + " 2=" + data[1] + " 3=" + data[2] + " 4=" + data[3] + " 5=" + data[4] );	
-		//System.out.println("**** Query: " + insertQuery);		
+		System.out.println("**** Query: " + insertQuery);		
 		int id1 = Integer.parseInt(data[0]);
 		int int1 = Integer.parseInt(data[4]);
 		java.sql.Date date;
@@ -195,16 +197,29 @@ public class ReadData extends HttpServlet {
 	/******************************************************************************************************************************************************************/
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-	
+		ArrayList<String> inputArr = new ArrayList<String>();
+		String dispatchJSP = null;
 		String paramName = "sqlType";
 		String paramValue = request.getParameter(paramName);
-		System.out.println("sqlType=" + paramName + " pVal=" + paramValue + "--");
+		//System.out.println("sqlType=" + paramName + " pVal=" + paramValue + "--");
 
 		if ((paramValue != null && !paramValue.isEmpty()) && paramValue.equals("INS")) {
-			doInsert();
-			System.out.println("sqlType=" + paramName + " pVal=" + paramValue + "--");
+			inputArr = doInsert();
+			//System.out.println("sqlType=" + paramName + " pVal=" + paramValue + "--");
+			dispatchJSP = "/uploadresult.jsp";
 			//testMove();
+		} else if ((paramValue != null && !paramValue.isEmpty()) && paramValue.equals("DSP")) {
+			dispatchJSP = "/displaytable.jsp";
 		}
+		//strArr = getData(startDateValue, endDateValue, connProp, sqlFile, sep);
+	 
+ 		request.getSession().setAttribute("strArr", inputArr);
+		// req.getSession().setAttribute(paramName, paramValue);
+		request.getRequestDispatcher(dispatchJSP).forward(request, response);
+		// System.out.println("Exit Servlet " + this.getServletName() + " in doGet() ");
+	 
+		
+		
 	} // End doGet
 
 	/******************************************************************************************************************************************************************/

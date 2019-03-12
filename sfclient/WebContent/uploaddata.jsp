@@ -15,12 +15,6 @@
   	 String title =  "Olympus FIS Rollover Database Update"; 	 
 %>
 
-<%
-
-%>
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -57,10 +51,10 @@ public ArrayList<String> readFileData(String filePath){
 
 public static String basename(String path) {
 		String filename = "";
-		System.out.println("PATH=" + path);
+		//System.out.println("PATH=" + path);
 		String[] pathparts = path.split("\\\\");
 		filename = pathparts[pathparts.length - 1];
-		System.out.println("FN=" + filename);
+		//System.out.println("FN=" + filename);
 		return filename;
 	}
 /*******************************************************************************************************************************************************************/
@@ -73,7 +67,7 @@ public static Connection  getDbConnection() {
 	String userId = "rapport";
 	String password = "rapport";
 
-		System.out.println("**** Load Driver");
+		//System.out.println("**** Load Driver");
 		try {
 			Class.forName(driverName);
 		} catch (ClassNotFoundException e) {
@@ -224,7 +218,7 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
                String line = dataArr.get(0);
                String[] list = line.split(",");
                int sz = list.length;
-               System.out.println("*** SZ=" + sz + "---");
+              // System.out.println("*** SZ=" + sz + "---");
                
                for (int m = 0; m <= sz; m++) {
             	   if (m != 0) {
@@ -272,6 +266,8 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
                } // end outter loop
                out.println("</table> <BR>");
                %>
+               <table  border="1" >
+               <tr><td>
                <form action = "/sfclient/readdata"  method = "get"  >
                <table  border="1" >
                	  <tr bgcolor="#5DADE2"  style="font-family: sans-serif; color: white;" >
@@ -287,6 +283,27 @@ public static Boolean  checkRecExists(Connection connection, String ID ) throws 
                	   </tr> </table> 
                	   <input type = "hidden" name="sqlType" value = "INS" />
                	   </form>
+               	   </td>
+               	   <td>
+               	   
+               	   <!--    ************************************************************************************************************************ -->
+               	    <form action = "/sfclient/readdata"  method = "get"  >
+               <table  border="1" >
+               	  <tr bgcolor="#5DADE2"  style="font-family: sans-serif; color: white;" >
+               	  
+               	  
+                <th class="a" >Display Data from Rapport </th>
+
+               	  </tr>
+               	   <tr>
+                 
+               	 <td bgcolor="#AEB6BF"><input type = "submit" value = "Display Data" /></td>
+               	 
+               	   </tr> </table> 
+               	   <input type = "hidden" name="sqlType" value = "DSP" />
+               	   </form>
+               	    </td></tr></table>
+               	   
               <%  
                
             }

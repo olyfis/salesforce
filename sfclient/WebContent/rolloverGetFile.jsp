@@ -89,7 +89,7 @@ $(function() {
 </div>
 
  <form action = "uploaddata.jsp" method = "post" enctype = "multipart/form-data">
-<table  border="1" class="tablesorter">
+<table  border="1" class="tablesorter"  >
 	  <tr bgcolor="#5DADE2"  style="font-family: sans-serif; color: white;" >
 	  
 	   <th class="a" >Select File</th>  
@@ -102,6 +102,24 @@ $(function() {
 	 
 	   </tr> </table> 
 	   </form>
+	 <BR>
+	  <!--    ************************************************************************************************************************ -->
+               	    <form action = "/sfclient/readdata"  method = "get"  >
+               <table  border="1" class="tablesorter"   width="50%">
+               	  <tr bgcolor="#5DADE2"  style="font-family: sans-serif; color: white;" >
+               	  
+               	  
+                <th    class="a" > Display Data from Rapport Database</th>
+
+               	  </tr>
+               	   <tr>
+                 
+               	 <td  bgcolor="#AEB6BF"><input type = "submit" value = "Display Data" /></td>
+               	 
+               	   </tr> </table> 
+               	   <input type = "hidden" name="sqlType" value = "DSP" />
+               	   </form>
+               	    </td></tr></table>
 	 
 <!-- ********************************************************************************************************************************************************* -->
 <%!  
