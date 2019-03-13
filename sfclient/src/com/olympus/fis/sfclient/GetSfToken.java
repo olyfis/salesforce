@@ -196,7 +196,7 @@ public class GetSfToken  extends HttpServlet {
 						+ USERNAME + "&password=" + PASSWORD;
 				// System.out.println(loginURL);
 				token = getAccessToken(loginURL);
-				System.out.println("Access token: " + token);
+				//System.out.println("Access token: " + token);
 				// end getting oAuth token
 				
 		//retValue = runURI(token);

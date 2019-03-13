@@ -42,6 +42,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.olympus.olyutil.JsonUtil;
 
 public class SfGetObjData extends HttpServlet {
 
@@ -304,7 +305,7 @@ public class SfGetObjData extends HttpServlet {
 	}
 
 	/******************************************************************************************************************************************************************/
-	public static void idJsonObjType(String jsonStr) {
+	public static void idJsonObjType(String jsonStr) throws Exception {
 		JSONObject jsonObj = null;
 		// String response = "above is my response";
 		Boolean arrStatus = false;
@@ -315,8 +316,7 @@ public class SfGetObjData extends HttpServlet {
 			String key = null;
 			while (iterator.hasNext()) {
 				key = (String) iterator.next();
-				// System.out.println("****^^^^^^^**** Key:" + key + "--" + "Value:" +
-				// jsonObj.get(key));
+				 //System.out.println("****^^^^^^^**** Key:" + key + "--" + "Value:" +  jsonObj.get(key));
 				Object Obj = jsonObj.get(key);
 				arrStatus = isJsonObjArray(jsonObj, key);
 				if (arrStatus) {
@@ -335,6 +335,7 @@ public class SfGetObjData extends HttpServlet {
 				 */
 			}
 		}
+		JsonUtil.getJsonKeyVal(jsonStr);
 	}
 
 	/******************************************************************************************************************************************************************/
@@ -350,8 +351,10 @@ public class SfGetObjData extends HttpServlet {
 		return false;
 	}
 
+	
+	
 	/******************************************************************************************************************************************************************/
-	public static void parseJsonData(String jsonStr) {
+	public static void parseJsonData(String jsonStr) throws Exception{
 		JSONObject jsonObj = null;
 		System.out.println("jsonStr:" + jsonStr);
 		System.out.println("***********************************************************************************");
@@ -364,11 +367,16 @@ public class SfGetObjData extends HttpServlet {
 		idJsonObjType(jsonStr);
 
 		JsonElement root = new JsonParser().parse(jsonStr);
+		
+	 
+		
+		
+		/*
 		JsonObject object = root.getAsJsonObject().get("records").getAsJsonObject();
 		Map<String, String> map = new Gson().fromJson(object.toString(), Map.class);
 		System.out.println("MAP:" + map);
 
-		/*
+		
 		 * //System.out.println("JO=" + jsonObj); Iterator iterator = jsonObj.keys();
 		 * String key = null;
 		 * 
@@ -378,9 +386,11 @@ public class SfGetObjData extends HttpServlet {
 		 */
 	}
 
+	
+	
 	/******************************************************************************************************************************************************************/
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+			throws ServletException, IOException   {
 
 		// response.getWriter().append("Served at: ").append(request.getContextPath());
 		String jsonStr = "[{\"Status\" : \"Failed\" }] ";
@@ -401,8 +411,13 @@ public class SfGetObjData extends HttpServlet {
 		 * 
 		 * }
 		 */
-		out.write(retValue);
-		parseJsonData(retValue);
+		out.write(retValue); 
+		try {
+			parseJsonData(retValue);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 

@@ -31,5 +31,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Java_Dev/lib/javax.servlet-api-3.1.0.jar"/>
 	<classpathentry kind="lib" path="C:/Java_Dev/lib/javax.ws.rs-api-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Java_Dev/lib/olyutil.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
